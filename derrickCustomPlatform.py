@@ -52,7 +52,7 @@ class CustomPlatform(pygame.Rect):
             # print(type)
 
 
-class VerticleMovingPlatform(CustomPlatform):
+class VerticalMovingPlatform(CustomPlatform):
     def __init__(self, posx, posy, width, height, bottomLimit, topLimit, speed, direction, type="normal"):
         super().__init__(posx, posy, width, height, type)
         self.bottomLimit = bottomLimit
@@ -61,7 +61,16 @@ class VerticleMovingPlatform(CustomPlatform):
         self.direction = direction
     
     def update(self, screen):
-        pass
+        before = self.top
+        self.move_ip(0, self.speed * self.direction)
+        if self.bottom >= self.bottomLimit:
+            self.bottom = self.bottomLimit
+            self.direction *= -1
+        elif self.top <= self.topLimit:
+            self.top = self.topLimit
+            self.direction *= -1
+        
+        return 0, self.top - before
 
 class HorizontalMovingPlatform(CustomPlatform):
     def __init__(self, posx, posy, width, height, leftLimit, rightLimit, speed, direction, type="normal"):
@@ -72,4 +81,13 @@ class HorizontalMovingPlatform(CustomPlatform):
         self.direction = direction
     
     def update(self, screen):
-        pass
+        before = self.left
+        self.move_ip(self.speed * self.direction, 0)
+        if self.right >= self.rightLimit:
+            self.right = self.rightLimit
+            self.direction *= -1
+        elif self.left <= self.leftLimit:
+            self.left = self.leftLimit
+            self.direction *= -1
+        
+        return self.left - before, 0

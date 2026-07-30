@@ -45,6 +45,7 @@ PLAYER_JUMP_HEIGHT = SCREEN_HEIGHT / (720 / 425)
 PLAYER_GRAVITY = SCREEN_HEIGHT / (720 / 720)
 PLAYER_TAG_SPEED_MULT = 1.1
 PLAYER_TAG_JUMP_MULT = 1
+PLATFORM_STICK_TOLERANCE = SCREEN_HEIGHT / (720 / 4)
 player_jump_mults = [1, 1, 1, 1, 1]
 player_speed_mults = [1, 1, 1, 1, 1]
 
@@ -53,6 +54,8 @@ platformSpeedNormal = 2.5
 movingPlatformSpeedSlow = 1.5
 platform21SpeedNormal = platformSpeedNormal
 platform23SpeedNormal = platformSpeedNormal
+# How close a player's feet have to be to a moving platform's top to ride it
+
 
 
 TAG_COOLDOWN = 3.0
@@ -126,9 +129,9 @@ mapAplatform17 = CustomPlatform(SCREEN_WIDTH / (1280 / 800), SCREEN_HEIGHT / (72
 mapAplatform18 = CustomPlatform(SCREEN_WIDTH / (1280 / 575), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 75))
 mapAplatform19 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120)) # | middle right side
 mapAplatform20 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 125), SCREEN_HEIGHT / (720 / 20))
-mapAplatform21 = CustomPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), "bounce") # Bounce
+mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 5, 1, "bounce") # Bounce
 mapAplatform22 = CustomPlatform(SCREEN_WIDTH / (1280 / 1135), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120))
-mapAplatform23 = CustomPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), "random")
+mapAplatform23 = HorizontalMovingPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), 310, 800, 5, 1, "random")
 
 # Map B platforms
 mapBfloorBase1 = CustomPlatform(0, SCREEN_HEIGHT - SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH, SCREEN_HEIGHT / (720 / 75))
@@ -231,6 +234,23 @@ mapDecrement = pygame.Rect(SCREEN_WIDTH / 2 - 353, 515, 75, 75)
 menuStart = pygame.Rect((SCREEN_WIDTH / (1280 / 440), SCREEN_HEIGHT / (720 / 400), SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 150)))
 
 startGame = pygame.Rect((SCREEN_WIDTH / 2 - 250, 610, 500, 75))
+
+def movePlatformWithRiders(platform, screen, aliveList):
+    riders = []
+    for i in range(len(player_positions)):
+        if not aliveList[i]:
+            continue
+        left = player_positions[i].x
+        right = left + PLAYER_WIDTH
+        bottom = player_positions[i].y + PLAYER_HEIGHT
+        if (right > platform.left and left < platform.right
+                and -PLATFORM_STICK_TOLERANCE <= platform.top - bottom <= PLATFORM_STICK_TOLERANCE):
+            riders.append(i)
+    dx, dy = platform.update(screen)
+    for i in riders:
+        player_positions[i].x += dx
+        player_positions[i].y += dy
+
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -243,7 +263,7 @@ while running:
             for idx, key in enumerate(jump_bindings):
                 if event.key == key and player_jump_counts[idx] > 0 and aliveList[idx] and not player_frozen[idx]:
                     player_velocities[idx] = -PLAYER_JUMP_HEIGHT * player_jump_mults[idx]
-                    player_velocities[idx] = 1
+                    player_jump_mults[idx] = 1
                     player_jump_counts[idx] -= 1
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if gameState == "titleScreen":
@@ -419,17 +439,11 @@ while running:
         text_surface = FONT.render(str(countdown_seconds), True, (0, 0, 0))
         screen.blit(text_surface, (SCREEN_WIDTH / 2 - fontWidth / 2, (SCREEN_HEIGHT / (1280 / 25))))
         
-        # Moving Platforms
-        if (mapAplatform21.bottom >= SCREEN_HEIGHT / (720 / 400) or mapAplatform21.top <= SCREEN_HEIGHT / (720 / 200)):
-            platform21SpeedNormal *= -1
-        mapAplatform21.move_ip(0, platform21SpeedNormal)
-
-        if (mapAplatform23.left <= 310 or mapAplatform23.right >= 800):
-            platform23SpeedNormal *= -1
-        mapAplatform23.move_ip(platform23SpeedNormal, 0)
 
         for platform in active_platforms:
             pygame.draw.rect(screen, platform.color, platform)
+            if isinstance(platform, VerticalMovingPlatform) or isinstance(platform, HorizontalMovingPlatform):
+                movePlatformWithRiders(platform, screen, playerAliveList)
 
         for i in range(len(player_velocities)):
             player_velocities[i] += PLAYER_GRAVITY * dt
