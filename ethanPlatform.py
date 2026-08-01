@@ -10,9 +10,6 @@ class CustomPlatform:
         self.rect = pygame.Rect(self.posx, self.posy, self.width, self.height)
         
       
-        
-
-
     @property
     def top(self): return self.rect.top
     @property
@@ -22,11 +19,16 @@ class CustomPlatform:
     @property
     def right(self): return self.rect.right
 
-    def update(self,screen):
+    def update(self, screen, playerHitbox=None):
         pygame.draw.rect(screen, self.color, self.rect)
 
 
+class EscapeDoor(CustomPlatform):
+    def __init__(self, posx, posy, width, height):
+        super().__init__(posx, posy, width, height, "green")
 
-        
+    def update(self, screen, playerHitbox=None):
+        super().update(screen)
 
-
+        if playerHitbox is not None and playerHitbox.colliderect(self.rect):
+            return "escape"

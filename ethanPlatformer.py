@@ -4,6 +4,7 @@ import random
 import pygame
 from ethanPlatform import *
 from ethanBullet import *
+from ethanLevels import *
 
 BULLET_COOLDOWN = 1.0
 
@@ -21,15 +22,10 @@ canJump = False
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
 
-# xpos, ypos, xwidth, yheight
-platformGround = CustomPlatform(0, 600, 1280, 20, "white")
-platform1 = CustomPlatform(100, 250, 150, 20, "white")
-platform2 = CustomPlatform(400, 450, 150, 20, "white")
-platform3 = CustomPlatform(700, 150, 150, 20, "white")
-platform4 = CustomPlatform(100, 350, 150, 20, "white")
-
-
-platformList = [platformGround, platform1, platform2, platform3, platform4]
+currentLevel = 0
+platformList = levels[currentLevel]()
+SPAWN = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+gameWon = False
 
 bulletList = []
 bulletCooldown = 6.0
@@ -79,6 +75,8 @@ while running:
     # Platform collisions using minimum overlap (MTV)
     canJump = False
     for platform in platformList:
+        if isinstance(platform, EscapeDoor):
+            continue   # door is walk-through, not solid
         if player_rect.colliderect(platform):
             overlap_top    = player_rect.bottom - platform.top
             overlap_bottom = platform.bottom - player_rect.top
@@ -112,9 +110,22 @@ while running:
     screen.fill("black")
 
     for platform in platformList:
-        platform.update(screen)
+        if platform.update(screen, player_rect) == "escape" and not gameWon:
+            currentLevel += 1
+            if currentLevel < len(levels):
+                platformList = levels[currentLevel]()
+                player_pos.update(SPAWN)
+                gravity = 0
+                bulletList.clear()
+            else:
+                gameWon = True
+            break
     
     pygame.draw.rect(screen, "gold", player_rect)
+
+    if gameWon:
+        text = font.render("You Escaped!", True, "green")
+        screen.blit(text, text.get_rect(center=screen.get_rect().center))
 
     # flip() the display to put your work on screen
     pygame.display.flip()

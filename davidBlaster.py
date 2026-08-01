@@ -4,7 +4,7 @@ import math
 
 import pygame
 from ethanBullet import *
-from enemy import Enemy
+from davidBlasterEnemy import Enemy
 
 # pygame setup
 pygame.init()
