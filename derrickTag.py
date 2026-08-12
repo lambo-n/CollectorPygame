@@ -129,9 +129,10 @@ mapAplatform17 = CustomPlatform(SCREEN_WIDTH / (1280 / 800), SCREEN_HEIGHT / (72
 mapAplatform18 = CustomPlatform(SCREEN_WIDTH / (1280 / 575), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 75))
 mapAplatform19 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120)) # | middle right side
 mapAplatform20 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 125), SCREEN_HEIGHT / (720 / 20))
-mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 5, 1, "bounce") # Bounce
+mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 5, 1, "normal") # Bounce
 mapAplatform22 = CustomPlatform(SCREEN_WIDTH / (1280 / 1135), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120))
 mapAplatform23 = HorizontalMovingPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), 310, 800, 5, 1, "random")
+mapAplatform24 = CustomPlatform(20, SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120))
 
 # Map B platforms
 mapBfloorBase1 = CustomPlatform(0, SCREEN_HEIGHT - SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH, SCREEN_HEIGHT / (720 / 75))
@@ -163,7 +164,7 @@ mapEfloorBase1 = CustomPlatform(0, SCREEN_HEIGHT - SCREEN_HEIGHT / (720 / 100), 
 mapA = [mapAfloorBase1, mapAroof1, mapAplatform1, mapAplatform2, mapAplatform3, mapAplatform4, mapAplatform5,
         mapAplatform6, mapAplatform7, mapAplatform8, mapAplatform9, mapAplatform10, mapAplatform11, mapAplatform12,
         mapAplatform13, mapAplatform14, mapAplatform15, mapAplatform16, mapAplatform17, mapAplatform18, mapAplatform19,
-        mapAplatform20, mapAplatform21, mapAplatform22, mapAplatform23]
+        mapAplatform20, mapAplatform21, mapAplatform22, mapAplatform23, mapAplatform24]
 mapB = [mapBfloorBase1, mapBroof1, mapBplatform1, mapBplatform2, mapBplatform3, mapBplatform4, mapBplatform5,
         mapBplatform6, mapBplatform7, mapBplatform8, mapBplatform9, mapBplatform10, mapBplatform11, mapBplatform12,
         mapBplatform13, mapBplatform14]
@@ -586,15 +587,16 @@ while running:
                         continue
 
 
+                    is_moving_platform = isinstance(platform, VerticalMovingPlatform) or isinstance(platform, HorizontalMovingPlatform)
                     if player_velocities[i] >= 0 and player_rect.bottom - prect.top <= 20:
                         player_positions[i].y = prect.y - PLAYER_HEIGHT
                         player_velocities[i] = 0
                         player_rect.y = player_positions[i].y
                         # Going Down into the Platform
-                    elif player_velocities[i] < 0 and prect.bottom - player_rect.top <= 20:
+                    elif (player_velocities[i] < 0 or is_moving_platform) and prect.bottom - player_rect.top <= 20:
                         player_rect.top = prect.bottom # If the bottom player is at the top of the platform
                         player_positions[i].y = player_rect.y
-                        player_velocities[i] = -player_velocities[i] * 0.3
+                        player_velocities[i] = abs(player_velocities[i]) * 0.3
                         # Going Up into the Platform
                     else:
                         if player_rect.centerx < prect.centerx:
