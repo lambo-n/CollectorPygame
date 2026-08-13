@@ -1,7 +1,7 @@
 # Example file showing a circle moving on screen
 import pygame
 import random
-from derrickCustomPlatform import *
+from customPlatform import *
 
 # pygame setup
 pygame.init()
@@ -129,10 +129,9 @@ mapAplatform17 = CustomPlatform(SCREEN_WIDTH / (1280 / 800), SCREEN_HEIGHT / (72
 mapAplatform18 = CustomPlatform(SCREEN_WIDTH / (1280 / 575), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 75))
 mapAplatform19 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120)) # | middle right side
 mapAplatform20 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 125), SCREEN_HEIGHT / (720 / 20))
-mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 5, 1, "normal") # Bounce
+mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 5, 1, "bounce") # Bounce
 mapAplatform22 = CustomPlatform(SCREEN_WIDTH / (1280 / 1135), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120))
 mapAplatform23 = HorizontalMovingPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), 310, 800, 5, 1, "random")
-mapAplatform24 = CustomPlatform(20, SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120))
 
 # Map B platforms
 mapBfloorBase1 = CustomPlatform(0, SCREEN_HEIGHT - SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH, SCREEN_HEIGHT / (720 / 75))
@@ -164,7 +163,7 @@ mapEfloorBase1 = CustomPlatform(0, SCREEN_HEIGHT - SCREEN_HEIGHT / (720 / 100), 
 mapA = [mapAfloorBase1, mapAroof1, mapAplatform1, mapAplatform2, mapAplatform3, mapAplatform4, mapAplatform5,
         mapAplatform6, mapAplatform7, mapAplatform8, mapAplatform9, mapAplatform10, mapAplatform11, mapAplatform12,
         mapAplatform13, mapAplatform14, mapAplatform15, mapAplatform16, mapAplatform17, mapAplatform18, mapAplatform19,
-        mapAplatform20, mapAplatform21, mapAplatform22, mapAplatform23, mapAplatform24]
+        mapAplatform20, mapAplatform21, mapAplatform22, mapAplatform23]
 mapB = [mapBfloorBase1, mapBroof1, mapBplatform1, mapBplatform2, mapBplatform3, mapBplatform4, mapBplatform5,
         mapBplatform6, mapBplatform7, mapBplatform8, mapBplatform9, mapBplatform10, mapBplatform11, mapBplatform12,
         mapBplatform13, mapBplatform14]
@@ -217,6 +216,24 @@ map = [mapA, mapB, mapC, mapD, mapE]
 
 downArrowImage = pygame.image.load("assets/arrow1.png").convert_alpha()
 downArrowImage = pygame.transform.scale(downArrowImage, (PLAYER_WIDTH, PLAYER_HEIGHT))
+
+playerPositionStill = pygame.image.load("assets/playerPositionStill.png").convert_alpha()
+playerPositionStill = pygame.transform.scale(playerPositionStill, (PLAYER_WIDTH, PLAYER_HEIGHT))
+
+playerPositionLeft = pygame.image.load("assets/playerPositionLeft.png").convert_alpha()
+playerPositionLeft = pygame.transform.scale(playerPositionLeft, (PLAYER_WIDTH, PLAYER_HEIGHT))
+
+playerPositionRight = pygame.image.load("assets/playerPositionRight.png").convert_alpha()
+playerPositionRight = pygame.transform.scale(playerPositionRight, (PLAYER_WIDTH, PLAYER_HEIGHT))
+
+player1Sprite = playerPositionStill
+player2Sprite = playerPositionStill
+player3Sprite = playerPositionStill
+player4Sprite = playerPositionStill
+player5Sprite = playerPositionStill
+
+playerSprites = [player1Sprite, player2Sprite, player3Sprite, player4Sprite, player5Sprite]
+
 
 # Menu UI Elements
 gamemodeIncrement = pygame.Rect(SCREEN_WIDTH / 2 + 280, 230, 75, 75)
@@ -422,7 +439,8 @@ while running:
         for i in range(len(player_positions)):
             if not playerAliveList[i]:
                 continue
-            pygame.draw.rect(screen, player_colors[i], (player_positions[i].x, player_positions[i].y, PLAYER_WIDTH, PLAYER_HEIGHT))
+            pygame.draw.rect(screen, player_colors[i], (player_positions[i].x, player_positions[i].y, PLAYER_WIDTH, PLAYER_HEIGHT), 10, border_radius=7)
+            screen.blit(playerSprites[i], (player_positions[i].x,player_positions[i].y))
             # Frozen players get an icy outline so you can tell who's stuck
             if player_frozen[i]:
                 pygame.draw.rect(screen, "cyan", (player_positions[i].x, player_positions[i].y, PLAYER_WIDTH, PLAYER_HEIGHT), 4)
@@ -439,10 +457,11 @@ while running:
 
         text_surface = FONT.render(str(countdown_seconds), True, (0, 0, 0))
         screen.blit(text_surface, (SCREEN_WIDTH / 2 - fontWidth / 2, (SCREEN_HEIGHT / (1280 / 25))))
-        
 
+        
         for platform in active_platforms:
             pygame.draw.rect(screen, platform.color, platform)
+            #screen.blit(downArrowImage, platform)
             if isinstance(platform, VerticalMovingPlatform) or isinstance(platform, HorizontalMovingPlatform):
                 movePlatformWithRiders(platform, screen, playerAliveList)
 
@@ -587,16 +606,15 @@ while running:
                         continue
 
 
-                    is_moving_platform = isinstance(platform, VerticalMovingPlatform) or isinstance(platform, HorizontalMovingPlatform)
                     if player_velocities[i] >= 0 and player_rect.bottom - prect.top <= 20:
                         player_positions[i].y = prect.y - PLAYER_HEIGHT
                         player_velocities[i] = 0
                         player_rect.y = player_positions[i].y
                         # Going Down into the Platform
-                    elif (player_velocities[i] < 0 or is_moving_platform) and prect.bottom - player_rect.top <= 20:
+                    elif player_velocities[i] < 0 and prect.bottom - player_rect.top <= 20:
                         player_rect.top = prect.bottom # If the bottom player is at the top of the platform
                         player_positions[i].y = player_rect.y
-                        player_velocities[i] = abs(player_velocities[i]) * 0.3
+                        player_velocities[i] = -player_velocities[i] * 0.3
                         # Going Up into the Platform
                     else:
                         if player_rect.centerx < prect.centerx:
@@ -710,8 +728,12 @@ while running:
                 #print(player_velocities[0])
             if keys[pygame.K_a]:
                 player1_pos.x -= PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[0] * dt
-            if keys[pygame.K_d]:
+                playerSprites[0] = playerPositionLeft
+            elif keys[pygame.K_d]:
                 player1_pos.x += PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[0] * dt
+                playerSprites[0] = playerPositionRight
+            else:
+                playerSprites[0] = playerPositionStill
 
         if player2_alive and not player_frozen[1]:
             if keys[pygame.K_t] and on_ground[1]:
@@ -719,8 +741,12 @@ while running:
                 player_velocities[1] = -PLAYER_JUMP_HEIGHT * PLAYER_TAG_JUMP_MULT * player_jump_mults[1]
             if keys[pygame.K_f]:
                 player2_pos.x -= PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[1] * dt
-            if keys[pygame.K_h]:
+                playerSprites[1] = playerPositionLeft
+            elif keys[pygame.K_h]:
                 player2_pos.x += PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[1] * dt
+                playerSprites[1] = playerPositionRight
+            else:
+                playerSprites[1] = playerPositionStill
         
         if player3_alive and not player_frozen[2]:
             if keys[pygame.K_i] and on_ground[2]:
@@ -728,8 +754,12 @@ while running:
                 player_velocities[2] = -PLAYER_JUMP_HEIGHT * PLAYER_TAG_JUMP_MULT * player_jump_mults[2]
             if keys[pygame.K_j]:
                 player3_pos.x -= PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[2] * dt
-            if keys[pygame.K_l]:
+                playerSprites[2] = playerPositionLeft
+            elif keys[pygame.K_l]:
                 player3_pos.x += PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[2] * dt
+                playerSprites[2] = playerPositionRight
+            else:
+                playerSprites[2] = playerPositionStill
         
         if player4_alive and not player_frozen[3]:
             if keys[pygame.K_LEFTBRACKET] and on_ground[3]:
@@ -737,8 +767,12 @@ while running:
                 player_velocities[3] = -PLAYER_JUMP_HEIGHT * PLAYER_TAG_JUMP_MULT * player_jump_mults[3]
                 if keys[pygame.K_SEMICOLON]:
                     player4_pos.x -= PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[3] * dt
-                if keys[pygame.K_RETURN]:
+                    playerSprites[3] = playerPositionLeft
+                elif keys[pygame.K_RETURN]:
                     player4_pos.x += PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[3] * dt
+                    playerSprites[3] = playerPositionRight
+                else:
+                    playerSprites[3] = playerPositionStill
 
         if player5_alive and not player_frozen[4]:
             if keys[pygame.K_UP] and on_ground[4]:
@@ -746,8 +780,12 @@ while running:
                 player_velocities[4] = -PLAYER_JUMP_HEIGHT * PLAYER_TAG_JUMP_MULT * player_jump_mults[4]
                 if keys[pygame.K_LEFT]:
                     player5_pos.x -= PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[4] * dt
-                if keys[pygame.K_RIGHT]:
+                    playerSprites[4] = playerPositionLeft
+                elif keys[pygame.K_RIGHT]:
                     player5_pos.x += PLAYER_MOVEMENT_SPEED * PLAYER_TAG_SPEED_MULT * player_speed_mults[4] * dt
+                    playerSprites[4] = playerPositionRight
+                else:
+                    playerSprites[4] = playerPositionStill
             
         for pos in player_positions:
             pos.x = max(0, min(pos.x, SCREEN_WIDTH - PLAYER_WIDTH))
