@@ -73,7 +73,7 @@ lvl5List = [platform1lvl5,teleportplatform2,killblock,platform2lvl5]
 levels = [lvl1List,lvl2List,lvl3List,lvl4List,lvl5List]
 
 
-currentLvl = 3
+currentLvl = 1
 currentPlatformList = lvl1List
 
 escapeRect = pygame.Rect(1000,100,50,50)
@@ -164,8 +164,20 @@ while running:
     # print/move platforms
     currentPlatformList = levels[currentLvl - 1]
     for platform in currentPlatformList:
-        if platform.update(screen, player_pos ,playerHitbox):
+        pygame.draw.rect(screen, platform.color, platform.rect)
+        outcome = platform.update(screen,player_pos,playerHitbox)
+        
+        if outcome == "kill":
             running = False
+            print("You Died")
+        elif outcome == "teleport":
+            player_pos.x = platform.teleportX
+            player_pos.y = platform.teleportY
+        elif outcome == "escape":
+            currentLvl += 1
+            player_pos.x = platform.escapeX
+            player_pos.y = platform.escapeY
+
 
     pygame.draw.rect(screen,"gold",escapeRect)
     screen.blit(playerImage,playerRect)

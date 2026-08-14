@@ -48,7 +48,6 @@ class Teleporter(ObbyPlatform):
 
 
 
-
 class Killblock(ObbyPlatform):
     def __init__(self, posx, posy, width, height, color):
 
@@ -72,12 +71,12 @@ class Escape(ObbyPlatform):
         self.escapeY = escapeY
 
     def update(self,screen,player_pos,playerHitbox):
-            super().update(screen, player_pos ,playerHitbox)
-    
-            if playerHitbox.colliderect(self.rect):
-                player_pos.x = self.escapeX
-                player_pos.y = self.escapeY
-                return "escape"
+        super().update(screen, player_pos ,playerHitbox)
+
+        if playerHitbox.colliderect(self.rect):
+            player_pos.x = self.escapeX
+            player_pos.y = self.escapeY
+            return "escape"
 
 
 
