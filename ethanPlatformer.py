@@ -1,9 +1,9 @@
 # Example file showing a circle moving on screen
 import random
-from bullet import *
+from ethanBullet import *
 import pygame
-from custom_platform import *
-from levels import *
+from ethanPlatform import *
+from ethanLevels import *
 BULLET_COOLDOWN = .85
 
 # pygame setup
@@ -22,10 +22,11 @@ player_pos = pygame.Vector2(300, 600)
 # xpos, ypos, xwidth, yheight
 
 
-currentLevel = 1
-platformList = levels[currentLevel - 1]()
-SPAWN = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-gameWon = False
+
+currentLevel = 2
+platformList = levels[currentLevel-1]()
+gameWOn = False
+
 
 bulletList = []
 
