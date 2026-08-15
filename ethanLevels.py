@@ -1,40 +1,43 @@
-from ethanPlatform import *
+import pygame
 
-
-def level1():
-    return[
-        CustomPlatform(0, 600, 1280, 20, "red"),
-        CustomPlatform ( 450, 450, 200 ,20, "red"),
-        CustomPlatform ( 450, 325,200,20, "red" ),
-    ]
-
-
-
-def level2():
-    return[
-        CustomPlatform(0, 600, 1280, 20, "red"), 
-        CustomPlatform ( 800, 400, 200 ,20, "red"),
-        CustomPlatform ( 785, 303,200,20, "red" ),
-        CustomPlatform(785, 203, 10, 100, "red" ),
-        CustomPlatform(785, 33, 10, 100, "red" ),
-        CustomPlatform(50, 530, 150, 20, "red" ),
-        CustomPlatform(195, 400, 10, 150, "red" ),
-        CustomPlatform(50, 400, 150, 20, "red" ),
-        CustomPlatform(300, 400, 35, 20, "red" ),
-        CustomPlatform(600, 400, 35, 20, "red" ),
-        EscapeDoor(300, 150, 100, 20, 0,500 ),
-        CustomPlatform(300, 170, 100, 20, "red" ),
-
-    ]
+class CustomPlatform:
+    def __init__ (self, posx, posy, width, height, color):
+        self.posx = posx
+        self.posy = posy
+        self.width = width
+        self.height = height
+        self.color = color
+        self.rect = pygame.Rect(self.posx, self.posy, self.width, self.height)
 
 
 
-def level3():
-    return[
-        CustomPlatform(0, 600, 1280, 20, "red"), 
-        CustomPlatform ( 250, 450, 200 ,20, "red"),
-        CustomPlatform ( 250, 325,200,20, "red" ),
-    ]
+    @property
+    def top(self): return self.rect.top
+    @property
+    def bottom(self): return self.rect.bottom
+    @property
+    def left(self): return self.rect.left
+    @property
+    def right(self): return self.rect.right
+
+    def update(self,screen, player_rect=None):
+        pygame.draw.rect(screen, self.color, self.rect)
+        return None
 
 
-levels = [level1, level2, level3]
+
+
+class EscapeDoor(CustomPlatform):
+    def __init__(self, posx, posy, width, height, spawnx, spawny):
+        super().__init__(posx, posy, width, height, "green")
+        self.spawnx = spawnx
+        self.spawny = spawny 
+
+
+    def update(self, screen, player_rect):
+        super().update(screen)
+
+        if player_rect is not None and player_rect.colliderect(self.rect):
+            return "escape"
+
+
