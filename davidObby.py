@@ -1,6 +1,6 @@
 # Example file showing a circle moving on screen
 import pygame
-from davidPlatform import *
+from obby_platform import *
 
 # pygame setup
 pygame.init()
@@ -24,18 +24,21 @@ platform1lvl1 = ObbyPlatform(0,650,1280,100,"blue")
 platform2lvl1 = ObbyPlatform(50,500,300,50,"black")
 platform3lvl1 = ObbyPlatform(200,325,300,50,"black")
 platform4lvl1 = ObbyPlatform(500,200,300,50,"black")
+escapeRect1 = Escape(1200,100,50,50,"gold", 100, 600)
 
-lvl1List = [platform1lvl1,platform2lvl1,platform3lvl1,platform4lvl1]
+lvl1List = [platform1lvl1,platform2lvl1,platform3lvl1,platform4lvl1,escapeRect1]
 
 # lvl 2 platforms
 platform1lvl2 = ObbyPlatform(0,650,1280,100,"blue")
 platform2lvl2 = ObbyPlatform(400,400,1,1,"black")
 platform3lvl2 = ObbyPlatform(200,600,1,1,"black")
 platform4lvl2 = ObbyPlatform(700,200,1,1,"black")
+escapeRect2 = Escape(900,100,50,50,"gold", 100, 600)
 
 
 
-lvl2List = [platform1lvl2, platform2lvl2, platform3lvl2, platform4lvl2]
+
+lvl2List = [platform1lvl2, platform2lvl2, platform3lvl2, platform4lvl2,escapeRect2]
 
 # lvl 3 platforms
 platform1Lvl3 = ObbyPlatform(40,670,100,230,"blue")
@@ -43,20 +46,24 @@ platform2Lvl3 = ObbyPlatform(500,700,30,20,"black")
 platform3Lvl3 = ObbyPlatform(700,500,20,20,"black")
 platform4Lvl3 = ObbyPlatform(400,300,1,1,"light grey")
 platform5Lvl3 = ObbyPlatform(800,200,1,1,"light grey")
+escapeRect3 = Escape(900,100,50,50,"gold", 500, 600)
+killblock = Killblock(0,900,1280,100,"red")
 
 
-lvl3List = [platform1Lvl3,platform2Lvl3,platform3Lvl3,platform4Lvl3,platform5Lvl3]
+lvl3List = [platform1Lvl3,platform2Lvl3,platform3Lvl3,platform4Lvl3,platform5Lvl3,escapeRect3,killblock]
 
 #lvl 4 platforms
 
 platform1lvl4 = ObbyPlatform(450,600,300,200,"blue")
 platform2lvl4 = ObbyPlatform(450,100,10,900,"black")
 platform3lvl4 = ObbyPlatform(900,100,10,900,"black")
-teleportplatform1 = Teleporter(800,400,50,50,"orange",800,500)
+teleportplatform1 = Teleporter(800,400,50,50,"red",1000,100)
+escapeRect4 = Escape(1100,100,50,50,"gold", 500, 600)
+killblock = Killblock(0,900,1280,100,"red")
 
 
 
-lvl4List = [platform1lvl4,platform2lvl4,platform3lvl4,teleportplatform1]
+lvl4List = [platform1lvl4,platform2lvl4,platform3lvl4,teleportplatform1,escapeRect4,killblock]
 
 
 #lvl 5 platforms
@@ -64,19 +71,33 @@ lvl4List = [platform1lvl4,platform2lvl4,platform3lvl4,teleportplatform1]
 platform1lvl5 = ObbyPlatform(0,650,1280,100,"blue")
 platform2lvl5 = ObbyPlatform(850,170,10,10,"black")
 killblock = Killblock(600,450,100,50,"red")
-teleportplatform2 = Teleporter(150,600,20,20,"white",800,500)
+teleportplatform2 = Teleporter(150,600,20,20,"white",900,100)
+escapeRect5 = Escape(1100,100,50,50,"gold", 500, 600)
 
 
-lvl5List = [platform1lvl5,teleportplatform2,killblock,platform2lvl5]
+lvl5List = [platform1lvl5,teleportplatform2,killblock,platform2lvl5,escapeRect5]
 
 
-levels = [lvl1List,lvl2List,lvl3List,lvl4List,lvl5List]
+#lvl 6 platforms
 
 
-currentLvl = 1
+platform1lvl6 = ObbyPlatform(600,690,1,2,"blue")
+platform2lvl6 = ObbyPlatform(200,500,1,2,"black")
+platform3lvl6 = ObbyPlatform(400,500,1,2,"black")
+platform4lvl6 = ObbyPlatform(800,100,1,2,"black")
+platform5lvl6 = ObbyPlatform(900,600,1,2,"black")
+
+
+lvl6List = [platform1lvl6,platform2lvl6,platform3lvl6,platform4lvl6,platform5lvl6]
+
+
+
+levels = [lvl1List,lvl2List,lvl3List,lvl4List,lvl5List,lvl6List]
+
+currentLvl = 4
 currentPlatformList = lvl1List
 
-escapeRect = pygame.Rect(1000,100,50,50)
+
 
 
 while running:
@@ -140,12 +161,7 @@ while running:
             player_pos.y = playerRect.centery
 
 
-    # door collision check
-    if escapeRect.colliderect(playerRect):
-        gravity = 0
-        player_pos.x = 100
-        player_pos.y = 600
-        currentLvl += 1
+
     
 
 
@@ -175,13 +191,14 @@ while running:
             player_pos.y = platform.teleportY
         elif outcome == "escape":
             currentLvl += 1
+            if currentLvl > len(levels):
+                running = False
+                print("you win")
             player_pos.x = platform.escapeX
             player_pos.y = platform.escapeY
 
 
-    pygame.draw.rect(screen,"gold",escapeRect)
-    screen.blit(playerImage,playerRect)
-
+    screen.blit(playerImage, playerRect)
     
 
     # flip() the display to put your work on screen
