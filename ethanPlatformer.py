@@ -1,12 +1,10 @@
 # Example file showing a circle moving on screen
 import random
-
+from bullet import *
 import pygame
-from ethanPlatform import *
-from ethanBullet import *
-from ethanLevels import *
-
-BULLET_COOLDOWN = 1.0
+from custom_platform import *
+from levels import *
+BULLET_COOLDOWN = .85
 
 # pygame setup
 pygame.init()
@@ -16,10 +14,12 @@ running = True
 dt = 0
 gravity = 0
 canJump = False
+bulletcooldown = BULLET_COOLDOWN
+playerHealth = 10 
+player_pos = pygame.Vector2(300, 600)
 
 
-
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+# xpos, ypos, xwidth, yheight
 
 
 currentLevel = 1
@@ -28,11 +28,6 @@ SPAWN = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 gameWon = False
 
 bulletList = []
-bulletCooldown = 6.0
-
-
-
-
 
 
 font = pygame.font.SysFont(None, 40)
@@ -44,25 +39,26 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
- 
-        
-        
-    player_rect = pygame.Rect(player_pos.x - 20, player_pos.y - 20, 40, 40)
-    
-    bulletCooldown -= dt
-   
-    if bulletCooldown < 0:
-        bulletCooldown = 6.0
-        randomPos = pygame.Vector2(random.randint(0, 1280), random.randint(0, 720))
+
+
+    # bullet loop
+    bulletcooldown -= dt
+    if bulletcooldown <0:
+        bulletcooldown = BULLET_COOLDOWN
+        randomPos = pygame.Vector2(random.randint(0, 1280), -10)
         newBullet = Bullet(randomPos, player_pos)
         bulletList.append(newBullet)
-
+    
+    
+    
+   
+    
     gravity += 1000 * dt
     player_pos.y += gravity * dt
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_UP] and canJump:
-        gravity = -600
+        gravity = -575
         canJump = False
     if keys[pygame.K_LEFT]:
         player_pos.x -= 300 * dt
@@ -76,7 +72,7 @@ while running:
     canJump = False
     for platform in platformList:
         if isinstance(platform, EscapeDoor):
-            continue   # door is walk-through, not solid
+            continue
         if player_rect.colliderect(platform):
             overlap_top    = player_rect.bottom - platform.top
             overlap_bottom = platform.bottom - player_rect.top
@@ -110,22 +106,38 @@ while running:
     screen.fill("black")
 
     for platform in platformList:
-        if platform.update(screen, player_rect) == "escape" and not gameWon:
+        outcome = platform.update(screen, player_rect)
+
+        if outcome == "escape":
             currentLevel += 1
+            player_pos.x = platform.spawnx
+            player_pos.y = platform.spawny
             if currentLevel < len(levels):
                 platformList = levels[currentLevel]()
-                player_pos.update(SPAWN)
                 gravity = 0
                 bulletList.clear()
             else:
-                gameWon = True
+                running = False
             break
+
+
+
+    for bullet in bulletList:
+        bullet.update(dt)
+        bullet.draw(screen)
+        bullet_rect = pygame.Rect( bullet.pos.x - 10, bullet.pos.y - 10 , 20, 20 )
+        if bullet_rect.colliderect(player_rect):
+            playerHealth -= 1
+            bulletList.remove(bullet)
+        if bullet.pos.x >= 1280:
+            bulletList.remove(bullet)
+        if bullet.pos.y >= 720:
+            bulletList.remove(bullet)
+
+    if playerHealth <= 0:
+        running = False
     
     pygame.draw.rect(screen, "gold", player_rect)
-
-    if gameWon:
-        text = font.render("You Escaped!", True, "green")
-        screen.blit(text, text.get_rect(center=screen.get_rect().center))
 
     # flip() the display to put your work on screen
     pygame.display.flip()
