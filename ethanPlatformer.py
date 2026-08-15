@@ -22,8 +22,8 @@ canJump = False
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
 
-currentLevel = 0
-platformList = levels[currentLevel]()
+currentLevel = 1
+platformList = levels[currentLevel - 1]()
 SPAWN = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 gameWon = False
 
