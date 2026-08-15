@@ -21,10 +21,9 @@ platformGround = CustomPlatform(0, 600, 1280, 20, "white")
 platform1 = CustomPlatform(100, 250, 150, 20, "white")
 platform2 = CustomPlatform(400, 450, 150, 20, "white")
 platform3 = CustomPlatform(700, 150, 150, 20, "white")
-platform4 = CustomPlatform(100, 350, 150, 20, "white")
 
 
-platformList = [platformGround, platform1, platform2, platform3, platform4]
+platformList = [platformGround, platform1, platform2, platform3]
 
 
 
