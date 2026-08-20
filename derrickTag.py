@@ -286,6 +286,10 @@ while running:
         if event.type == pygame.KEYDOWN and gameState == "playing":
             if event.key == pygame.K_ESCAPE:
                 gameState = "pause"
+                pause_background = screen.copy()
+        elif event.type == pygame.KEYDOWN and gameState == "pause":
+            if event.key == pygame.K_ESCAPE:
+                gameState = "playing"
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if gameState == "titleScreen":
                 if menuStart.collidepoint(event.pos):
@@ -871,9 +875,17 @@ while running:
                 pygame.time.set_timer(TIMER_EVENT, 0)
 
     elif gameState == "pause": # Checks if the gamestate is pause
-        transparent_surface = pygame.Surface((1000, 500), pygame.SRCALPHA)
-        transparent_surface.fill("black")
-        screen.blit(transparent_surface, (0,0))
+        # Redraw the snapshot taken at the moment of pausing every frame,
+        # then darken it once, so the overlay doesn't stack frame over frame.
+        screen.blit(pause_background, (0, 0))
+        pause_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        pause_overlay.fill((0, 0, 0, 150))
+        screen.blit(pause_overlay, (0, 0))
+
+        text_surface = FONT.render("PAUSED", True, (255, 255, 255))
+        screen.blit(text_surface, (SCREEN_WIDTH / 2 - text_surface.get_width() // 2, SCREEN_HEIGHT / 2 - 60))
+        info_surface = FONT.render("Press ESC to resume", True, (255, 255, 255))
+        screen.blit(info_surface, (SCREEN_WIDTH / 2 - info_surface.get_width() // 2, SCREEN_HEIGHT / 2 + 20))
 
     elif gameState == "results": # Checks if the gamestate is results
 
