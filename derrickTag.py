@@ -45,7 +45,7 @@ PLAYER_JUMP_HEIGHT = SCREEN_HEIGHT / (720 / 425)
 PLAYER_GRAVITY = SCREEN_HEIGHT / (720 / 720)
 PLAYER_TAG_SPEED_MULT = 1.1
 PLAYER_TAG_JUMP_MULT = 1
-PLATFORM_STICK_TOLERANCE = SCREEN_HEIGHT / (720 / 4)
+PLATFORM_STICK_TOLERANCE = SCREEN_HEIGHT / (720 / 2)
 player_jump_mults = [1, 1, 1, 1, 1]
 player_speed_mults = [1, 1, 1, 1, 1]
 
@@ -129,9 +129,9 @@ mapAplatform17 = CustomPlatform(SCREEN_WIDTH / (1280 / 800), SCREEN_HEIGHT / (72
 mapAplatform18 = CustomPlatform(SCREEN_WIDTH / (1280 / 575), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 75))
 mapAplatform19 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120)) # | middle right side
 mapAplatform20 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 125), SCREEN_HEIGHT / (720 / 20))
-mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 5, 1, "bounce") # Bounce
+mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 3, 1, "bounce") # Bounce
 mapAplatform22 = CustomPlatform(SCREEN_WIDTH / (1280 / 1135), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120))
-mapAplatform23 = HorizontalMovingPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), 310, 800, 5, 1, "random")
+mapAplatform23 = HorizontalMovingPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), 310, 800, 3, 1, "random")
 
 # Map B platforms
 mapBfloorBase1 = CustomPlatform(0, SCREEN_HEIGHT - SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH, SCREEN_HEIGHT / (720 / 75))
@@ -283,14 +283,13 @@ while running:
                     player_velocities[idx] = -PLAYER_JUMP_HEIGHT * player_jump_mults[idx]
                     player_jump_mults[idx] = 1
                     player_jump_counts[idx] -= 1
+        if event.type == pygame.KEYDOWN and gameState == "playing":
+            if event.key == pygame.K_ESCAPE:
+                gameState = "pause"
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if gameState == "titleScreen":
                 if menuStart.collidepoint(event.pos):
                     gameState = "menu"
-
-            if gameState == "results":
-                # Click anywhere to head back to the menu for another round
-                gameState = "menu"
 
             if gameState == "menu":
                 if playerCountIncrement.collidepoint(event.pos):
@@ -844,6 +843,11 @@ while running:
                     winner_text = "Time's up! Survivors win: " + ", ".join(player_colors[i].capitalize() for i in uninfected)
                 gameState = "results"
                 pygame.time.set_timer(TIMER_EVENT, 0)
+
+    elif gameState == "pause": # Checks if the gamestate is pause
+        transparent_surface = pygame.Surface((1000, 500), pygame.SRCALPHA)
+        transparent_surface.fill("black")
+        screen.blit(transparent_surface, (0,0))
 
     elif gameState == "results": # Checks if the gamestate is results
 
