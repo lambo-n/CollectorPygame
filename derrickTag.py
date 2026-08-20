@@ -45,7 +45,7 @@ PLAYER_JUMP_HEIGHT = SCREEN_HEIGHT / (720 / 425)
 PLAYER_GRAVITY = SCREEN_HEIGHT / (720 / 720)
 PLAYER_TAG_SPEED_MULT = 1.1
 PLAYER_TAG_JUMP_MULT = 1
-PLATFORM_STICK_TOLERANCE = SCREEN_HEIGHT / (720 / 4)
+PLATFORM_STICK_TOLERANCE = SCREEN_HEIGHT / (720 / 2)
 player_jump_mults = [1, 1, 1, 1, 1]
 player_speed_mults = [1, 1, 1, 1, 1]
 
@@ -283,14 +283,13 @@ while running:
                     player_velocities[idx] = -PLAYER_JUMP_HEIGHT * player_jump_mults[idx]
                     player_jump_mults[idx] = 1
                     player_jump_counts[idx] -= 1
+        if event.type == pygame.KEYDOWN and gameState == "playing":
+            if event.key == pygame.K_ESCAPE:
+                gameState = "pause"
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if gameState == "titleScreen":
                 if menuStart.collidepoint(event.pos):
                     gameState = "menu"
-
-            if gameState == "results":
-                # Click anywhere to head back to the menu for another round
-                gameState = "menu"
 
             if gameState == "menu":
                 if playerCountIncrement.collidepoint(event.pos):
@@ -870,6 +869,11 @@ while running:
                     winner_text = "Time's up! Survivors win: " + ", ".join(player_colors[i].capitalize() for i in uninfected)
                 gameState = "results"
                 pygame.time.set_timer(TIMER_EVENT, 0)
+
+    elif gameState == "pause": # Checks if the gamestate is pause
+        transparent_surface = pygame.Surface((1000, 500), pygame.SRCALPHA)
+        transparent_surface.fill("black")
+        screen.blit(transparent_surface, (0,0))
 
     elif gameState == "results": # Checks if the gamestate is results
 
