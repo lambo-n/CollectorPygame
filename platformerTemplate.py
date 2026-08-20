@@ -40,7 +40,6 @@ while running:
  
         
         
-    player_rect = pygame.Rect(player_pos.x - 20, player_pos.y - 20, 40, 40)
     
    
     

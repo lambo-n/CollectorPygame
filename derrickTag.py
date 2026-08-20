@@ -38,9 +38,9 @@ pygame.time.set_timer(TIMER_EVENT, 1000)
 countdown_seconds = 100
 
 # Player Variables
-PLAYER_HEIGHT = SCREEN_HEIGHT / (720 / 20)
-PLAYER_WIDTH = SCREEN_WIDTH / (1280 / 20)
-PLAYER_MOVEMENT_SPEED = SCREEN_WIDTH / (1280 / 250)
+PLAYER_HEIGHT = 20
+PLAYER_WIDTH = 20
+PLAYER_MOVEMENT_SPEED = 300
 PLAYER_JUMP_HEIGHT = SCREEN_HEIGHT / (720 / 425)
 PLAYER_GRAVITY = SCREEN_HEIGHT / (720 / 720)
 PLAYER_TAG_SPEED_MULT = 1.1
@@ -129,9 +129,9 @@ mapAplatform17 = CustomPlatform(SCREEN_WIDTH / (1280 / 800), SCREEN_HEIGHT / (72
 mapAplatform18 = CustomPlatform(SCREEN_WIDTH / (1280 / 575), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 75))
 mapAplatform19 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120)) # | middle right side
 mapAplatform20 = CustomPlatform(SCREEN_WIDTH / (1280 / 900), SCREEN_HEIGHT / (720 / 200), SCREEN_WIDTH / (1280 / 125), SCREEN_HEIGHT / (720 / 20))
-mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 5, 1, "bounce") # Bounce
+mapAplatform21 = VerticalMovingPlatform(SCREEN_WIDTH / (1280 / 1025), SCREEN_HEIGHT / (720 / 300), SCREEN_WIDTH / (1280 / 130), SCREEN_HEIGHT / (720 / 20), 400, 200, 3, 1, "bounce") # Bounce
 mapAplatform22 = CustomPlatform(SCREEN_WIDTH / (1280 / 1135), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 20), SCREEN_HEIGHT / (720 / 120))
-mapAplatform23 = HorizontalMovingPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), 310, 800, 5, 1, "random")
+mapAplatform23 = HorizontalMovingPlatform(SCREEN_WIDTH / (1280 / 400), SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH / (1280 / 150), SCREEN_HEIGHT / (720 / 20), 310, 800, 3, 1, "random")
 
 # Map B platforms
 mapBfloorBase1 = CustomPlatform(0, SCREEN_HEIGHT - SCREEN_HEIGHT / (720 / 100), SCREEN_WIDTH, SCREEN_HEIGHT / (720 / 75))
@@ -538,89 +538,115 @@ while running:
                         continue
                         # Pink Platforms
                     if getattr(platform, "type", "normal") == "bounce":
-                        if (prev_bottom <= prect.top + 1):
-                            player_jump_mults[i] = 1.5
-                        if player_velocities[i] >= 0 and player_rect.bottom - prect.top <= 20:
+                        overlap_left = player_rect.right - prect.left
+                        overlap_right = prect.right - player_rect.left
+                        overlap_top = player_rect.bottom - prect.top
+                        overlap_bottom = prect.bottom - player_rect.top
+                        min_h = min(overlap_left, overlap_right)
+                        min_v = min(overlap_top, overlap_bottom)
+
+                        if min_h < min_v:
+                            # Going into the side of the platform
+                            if overlap_left < overlap_right:
+                                player_rect.right = prect.left
+                            else:
+                                player_rect.left = prect.right
+                        elif overlap_top <= overlap_bottom and player_velocities[i] >= 0:
                             player_jump_mults[i] = 1.5
                             player_positions[i].y = prect.y - PLAYER_HEIGHT
                             player_velocities[i] = 0
                             player_rect.y = player_positions[i].y
                             # Going Down into the Platform
-                        elif player_velocities[i] < 0 and prect.bottom - player_rect.top <= 20:
+                        else:
                             player_rect.top = prect.bottom # If the bottom player is at the top of the platform
                             player_positions[i].y = player_rect.y
                             player_velocities[i] = -player_velocities[i] * 0.3
                             # Going Up into the Platform
-                        else:
-                            if player_rect.centerx < prect.centerx:
-                                player_rect.right = prect.left
-                            else: 
-                                player_rect.left = prect.right
-                            # Going into the side of the platform
-                            #print(player_jump_mults[i])
+                        player_positions[i].x = player_rect.x
                         continue
                     if getattr(platform, "type", "normal") == "speed":
-                        if player_velocities[i] >= 0 and player_rect.bottom - prect.top <= 20:
+                        overlap_left = player_rect.right - prect.left
+                        overlap_right = prect.right - player_rect.left
+                        overlap_top = player_rect.bottom - prect.top
+                        overlap_bottom = prect.bottom - player_rect.top
+                        min_h = min(overlap_left, overlap_right)
+                        min_v = min(overlap_top, overlap_bottom)
+
+                        if min_h < min_v:
+                            # Going into the side of the platform
+                            if overlap_left < overlap_right:
+                                player_rect.right = prect.left
+                            else:
+                                player_rect.left = prect.right
+                        elif overlap_top <= overlap_bottom and player_velocities[i] >= 0:
                             player_positions[i].y = prect.y - PLAYER_HEIGHT
                             player_velocities[i] = 0
                             player_rect.y = player_positions[i].y
                             player_speed_mults[i] = 1.5
                             # Going Down into the Platform
-                        elif player_velocities[i] < 0 and prect.bottom - player_rect.top <= 20:
+                        else:
                             player_rect.top = prect.bottom # If the bottom player is at the top of the platform
                             player_positions[i].y = player_rect.y
                             player_velocities[i] = -player_velocities[i] * 0.3
                             # Going Up into the Platform
-                        else:
-                            if player_rect.centerx < prect.centerx:
-                                player_rect.right = prect.left
-                            else: player_rect.left = prect.right
-                            # Going into the side of the platform
                         player_positions[i].x = player_rect.x
                         continue
                     if getattr(platform, "type", "normal") == "danger":
-                        if player_velocities[i] >= 0 and player_rect.bottom - prect.top <= 20:
+                        overlap_left = player_rect.right - prect.left
+                        overlap_right = prect.right - player_rect.left
+                        overlap_top = player_rect.bottom - prect.top
+                        overlap_bottom = prect.bottom - player_rect.top
+                        min_h = min(overlap_left, overlap_right)
+                        min_v = min(overlap_top, overlap_bottom)
+
+                        if min_h < min_v:
+                            # Going into the side of the platform
+                            if overlap_left < overlap_right:
+                                player_rect.right = prect.left
+                            else:
+                                player_rect.left = prect.right
+                        elif overlap_top <= overlap_bottom and player_velocities[i] >= 0:
                             player_positions[i].y = prect.y - PLAYER_HEIGHT
                             player_velocities[i] = 0
                             player_rect.y = player_positions[i].y
                             # Going Down into the Platform
-                            taggedPlayer = i
-                        elif player_velocities[i] < 0 and prect.bottom - player_rect.top <= 20:
+                        else:
                             player_rect.top = prect.bottom # If the bottom player is at the top of the platform
                             player_positions[i].y = player_rect.y
                             player_velocities[i] = -player_velocities[i] * 0.3
                             # Going Up into the Platform
-                            taggedPlayer = i
-                        else:
-                            if player_rect.centerx < prect.centerx:
-                                player_rect.right = prect.left
-                            else: player_rect.left = prect.right
-                            # Going into the side of the platform
-                            taggedPlayer = i
+                        taggedPlayer = i
+                        player_positions[i].x = player_rect.x
                         continue
-                    player_positions[i].x = player_rect.x
                     if getattr(platform, "type", "normal") == "crash":
                         if (player_velocities[i] >= 0
                             and prev_bottom <= prect.top + 1):
                             player_velocities[i] = 0/0
                         continue
 
+                    overlap_left = player_rect.right - prect.left
+                    overlap_right = prect.right - player_rect.left
+                    overlap_top = player_rect.bottom - prect.top
+                    overlap_bottom = prect.bottom - player_rect.top
+                    min_h = min(overlap_left, overlap_right)
+                    min_v = min(overlap_top, overlap_bottom)
 
-                    if player_velocities[i] >= 0 and player_rect.bottom - prect.top <= 20:
+                    if min_h < min_v:
+                        # Going into the side of the platform
+                        if overlap_left < overlap_right:
+                            player_rect.right = prect.left
+                        else:
+                            player_rect.left = prect.right
+                    elif overlap_top <= overlap_bottom and player_velocities[i] >= 0:
                         player_positions[i].y = prect.y - PLAYER_HEIGHT
                         player_velocities[i] = 0
                         player_rect.y = player_positions[i].y
                         # Going Down into the Platform
-                    elif player_velocities[i] < 0 and prect.bottom - player_rect.top <= 20:
+                    else:
                         player_rect.top = prect.bottom # If the bottom player is at the top of the platform
                         player_positions[i].y = player_rect.y
                         player_velocities[i] = -player_velocities[i] * 0.3
                         # Going Up into the Platform
-                    else:
-                        if player_rect.centerx < prect.centerx:
-                            player_rect.right = prect.left
-                        else: player_rect.left = prect.right
-                        # Going into the side of the platform
                     player_positions[i].x = player_rect.x
 
 
