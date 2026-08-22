@@ -1,4 +1,4 @@
-from ethanPlatform import *
+from custom_platform import *
 
 
 def level1():
@@ -31,9 +31,12 @@ def level2():
 
 def level3():
     return[
-        CustomPlatform(0, 600, 1280, 20, "red"), 
-        CustomPlatform ( 250, 450, 200 ,20, "red"),
-        CustomPlatform ( 250, 325,200,20, "red" ),
+        CustomPlatform(0, 600, 1280, 20, "blue"), #floor 
+        CustomPlatform ( 250, 450, 200 ,20, "blue"), #1
+        CustomPlatform ( 250, 325,200,20, "blue" ), #2
+        CustomPlatform ( 250, 325,200,20, "blue" ), #3
+        
+
     ]
 
 
