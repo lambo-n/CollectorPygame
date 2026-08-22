@@ -1,11 +1,11 @@
 # Example file showing a circle moving on screen
 import random
-from ethanBullet import *
+from bullet import *
 import pygame
-from ethanPlatform import *
-from ethanLevels import *
-from ethanEnemies import *
-BULLET_COOLDOWN = .85
+from custom_platform import *
+from levels import *
+from enemies import*
+BULLET_COOLDOWN = .95
 
 # pygame setup
 pygame.init()
@@ -16,12 +16,11 @@ dt = 0
 gravity = 0
 canJump = False
 bulletcooldown = BULLET_COOLDOWN
-playerHealth = 10 
+playerHealth = 10
 player_pos = pygame.Vector2(300, 600)
 
 
 # xpos, ypos, xwidth, yheight
-
 
 
 currentLevel = 2
@@ -30,8 +29,7 @@ gameWOn = False
 
 
 bulletList = []
-enemyList = enemies[currentLevel-1]()
-
+enemyList = enemies[currentLevel - 1]()
 
 font = pygame.font.SysFont(None, 40)
 
@@ -128,7 +126,7 @@ while running:
         enemy.update(dt)
         enemy.draw(screen)
         if player_rect.colliderect(enemy.rect):
-            playerHealth -= 1
+            playerHealth -= 2
             enemyList.remove(enemy)
 
     for bullet in bulletList:
