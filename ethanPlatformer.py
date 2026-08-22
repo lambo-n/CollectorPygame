@@ -4,6 +4,7 @@ from ethanBullet import *
 import pygame
 from ethanPlatform import *
 from ethanLevels import *
+from ethanEnemies import *
 BULLET_COOLDOWN = .85
 
 # pygame setup
@@ -29,6 +30,7 @@ gameWOn = False
 
 
 bulletList = []
+enemyList = enemies[currentLevel-1]()
 
 
 font = pygame.font.SysFont(None, 40)
@@ -113,15 +115,21 @@ while running:
             currentLevel += 1
             player_pos.x = platform.spawnx
             player_pos.y = platform.spawny
-            if currentLevel < len(levels):
-                platformList = levels[currentLevel]()
+            if currentLevel <= len(levels):
+                platformList = levels[currentLevel-1]()
+                enemyList = enemies[currentLevel-1]()
                 gravity = 0
                 bulletList.clear()
             else:
                 running = False
             break
 
-
+    for enemy in enemyList:
+        enemy.update(dt)
+        enemy.draw(screen)
+        if player_rect.colliderect(enemy.rect):
+            playerHealth -= 1
+            enemyList.remove(enemy)
 
     for bullet in bulletList:
         bullet.update(dt)
