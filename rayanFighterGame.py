@@ -21,9 +21,9 @@ player2_pos = pygame.Vector2(screen.get_width() / 2 + 200, screen.get_height() /
 
 
 # xpos, ypos, xwidth, yheight
-platformGround = CustomPlatform(0, 600, 920, 20, "white")
+platformGround = CustomPlatform(0, 600, 920, 100, "white")
 platform1 = CustomPlatform(50, 250, 180, 20, "white")
-platform2 = CustomPlatform(400, 450, 180, 20, "white")
+platform2 = CustomPlatform(400, 400, 180, 20, "white")
 platform3 = CustomPlatform(700, 250, 180, 20, "white")
 
 
@@ -32,11 +32,17 @@ platformList = [platformGround, platform1, platform2, platform3]
 player1_image = pygame.image.load("assets/jumpboy.png")
 player1_image = pygame.transform.scale(player1_image, (140, 140))
 
+player1_punch = pygame.image.load("assets/cops.png")
+player1_punch = pygame.transform.scale(player1_punch, (140, 140))
+
 player2_image = pygame.image.load("assets/cryingChild.png")
 player2_image = pygame.transform.scale(player2_image, (140, 140))
 
-player1 = Player(player1_pos, pygame.image.load("assets/jumpboy.png"), 0, canJump)
-player2 = Player(player2_pos, pygame.image.load("assets/cryingChild.png"), 0, canJump)
+player2_punch = pygame.image.load("assets/cave.png")
+player2_punch = pygame.transform.scale(player2_punch, (140, 140))
+
+player1 = Player(player1_pos, pygame.image.load("assets/jumpboy.png"), 0, canJump, "p1")
+player2 = Player(player2_pos, pygame.image.load("assets/cryingChild.png"), 0, canJump, "p2")
 
 playerList = [player1, player2]
 
@@ -55,8 +61,8 @@ while running:
     
     keys = pygame.key.get_pressed()
     for player in playerList:
-        player.update(dt)
         player.input(keys, dt)
+        player.update(dt)
 
 
 
@@ -74,13 +80,17 @@ while running:
 
                 if overlap_y <= overlap_x:
                     # Vertical collision
-                    if player.gravity >= 0 and overlap_top <= overlap_bottom:
-                        player.rect.bottom = platform.top
-                        player.gravity = 0
-                        player.canJump = True
+                    if overlap_top <= overlap_bottom:
+                        # Landing on top: only if not moving upward
+                        if player.gravity >= 0:
+                            player.rect.bottom = platform.top
+                            player.gravity = 0
+                            player.canJump = True
                     else:
-                        player.rect.top = platform.bottom
-                        player.gravity = 0
+                        # Head bump: only if actually moving upward
+                        if player.gravity < 0:
+                            player.rect.top = platform.bottom
+                            player.gravity = 0
                 else:
                     # Horizontal collision
                     if overlap_left <= overlap_right:
