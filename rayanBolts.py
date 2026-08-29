@@ -1,5 +1,5 @@
 import pygame
-from enemy import Enemy
+from rayanEnemy import Enemy
 from rayanBoltsProjectile import Projectile
 import random
 

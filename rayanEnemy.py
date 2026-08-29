@@ -10,6 +10,8 @@ class Enemy:
         self.directionChange = 0
         self.direction = 1
         
+        
+        
     def update(self, dt):
         if self.directionChange >= 50:
             self.directionChange = 0

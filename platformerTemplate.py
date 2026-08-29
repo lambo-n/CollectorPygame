@@ -1,8 +1,9 @@
-# Example file showing a circle moving on screen
-import random
-
+# Example platformer.
+#   platformTemplate.py     -- CustomPlatform, the solid boxes
+#   physicsBodyTemplate.py  -- PhysicsBody, all of the collision maths
 import pygame
-from platformTemplate import *
+from platformTemplate import CustomPlatform
+from physicsBodyTemplate import PhysicsBody
 
 # pygame setup
 pygame.init()
@@ -10,11 +11,9 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 dt = 0
-gravity = 0
-canJump = False
 
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-
+WALK_SPEED = 300
+JUMP_SPEED = 600
 
 # xpos, ypos, xwidth, yheight
 platformGround = CustomPlatform(0, 600, 1280, 20, "white")
@@ -22,13 +21,23 @@ platform1 = CustomPlatform(100, 250, 150, 20, "white")
 platform2 = CustomPlatform(400, 450, 150, 20, "white")
 platform3 = CustomPlatform(700, 150, 150, 20, "white")
 
+# A tall platform is just a platform.  Side collisions work the same way: walk
+# into it and you stop, jump beside it and you slide up it, land on it and you
+# stand on it.
+wall = CustomPlatform(950, 300, 40, 300, "white")
 
-platformList = [platformGround, platform1, platform2, platform3]
+# Two platforms sharing an edge.  Walking across the seam is smooth -- nothing
+# to snag on, because horizontal and vertical collisions are handled separately.
+ledgeA = CustomPlatform(180, 520, 120, 20, "white")
+ledgeB = CustomPlatform(300, 520, 120, 20, "white")
 
+platformList = [platformGround, platform1, platform2, platform3, wall, ledgeA, ledgeB]
 
+# xpos, ypos, xwidth, yheight -- the top-left corner, same as a platform.
+# Any size works; try 12 x 12 or 80 x 140.
+player = PhysicsBody(620, 320, 40, 40, "gold")
 
-
-font = pygame.font.SysFont(None, 40)
+font = pygame.font.SysFont(None, 26)
 
 while running:
     # poll for events
@@ -37,66 +46,39 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
- 
-        
-        
-    
-   
-    
-    gravity += 1000 * dt
-    player_pos.y += gravity * dt
-
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP] and canJump:
-        gravity = -600
-        canJump = False
+
+    # Set a velocity; the engine does the moving.  Never move the player
+    # directly, or you will move it inside a platform.
+    player.vel_x = 0
     if keys[pygame.K_LEFT]:
-        player_pos.x -= 300 * dt
+        player.vel_x = -WALK_SPEED
     if keys[pygame.K_RIGHT]:
-        player_pos.x += 300 * dt
+        player.vel_x = WALK_SPEED
+    if keys[pygame.K_UP] and player.on_ground:
+        player.jump(JUMP_SPEED)
 
-    # Rebuild rect after movement so collisions use updated position
-    player_rect = pygame.Rect(player_pos.x - 20, player_pos.y - 20, 40, 40)
+    # Gravity, movement, substepping and every collision, in one call.  The
+    # screen rect is passed as bounds, so its edges are solid too.
+    player.move_and_collide(platformList, dt, bounds=screen.get_rect())
 
-    # Platform collisions using minimum overlap (MTV)
-    canJump = False
-    for platform in platformList:
-        if player_rect.colliderect(platform):
-            overlap_top    = player_rect.bottom - platform.top
-            overlap_bottom = platform.bottom - player_rect.top
-            overlap_left   = player_rect.right - platform.left
-            overlap_right  = platform.right - player_rect.left
-            overlap_y = min(overlap_top, overlap_bottom)
-            overlap_x = min(overlap_left, overlap_right)
-
-            if overlap_y <= overlap_x:
-                # Vertical collision
-                if gravity >= 0 and overlap_top <= overlap_bottom:
-                    player_rect.bottom = platform.top
-                    gravity = 0
-                    canJump = True
-                else:
-                    player_rect.top = platform.bottom
-                    gravity = 0
-            else:
-                # Horizontal collision
-                if overlap_left <= overlap_right:
-                    player_rect.right = platform.left
-                else:
-                    player_rect.left = platform.right
-            player_pos.x = player_rect.centerx
-            player_pos.y = player_rect.centery
-
-    player_rect.clamp_ip(screen.get_rect())
-    player_pos.x = player_rect.centerx
-    player_pos.y = player_rect.centery
-    
     screen.fill("black")
 
     for platform in platformList:
         platform.update(screen)
-    
-    pygame.draw.rect(screen, "gold", player_rect)
+
+    player.draw(screen)
+
+    # Live read-out of what the engine decided this frame.
+    state = "on_ground %s   hit_head %s   walls %s%s   squeezed %s   vel_y %6.1f" % (
+        player.on_ground,
+        player.hit_head,
+        "<" if player.hit_wall_left else "-",
+        ">" if player.hit_wall_right else "-",
+        player.squeezed,
+        player.vel_y,
+    )
+    screen.blit(font.render(state, True, "gray"), (10, 10))
 
     # flip() the display to put your work on screen
     pygame.display.flip()
