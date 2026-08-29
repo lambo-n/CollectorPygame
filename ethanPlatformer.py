@@ -146,6 +146,9 @@ while running:
     
     pygame.draw.rect(screen, "gold", player_rect)
 
+
+    pygame.draw.rect(screen,"red", (player_pos.x- 40 , player_pos.y- 60, 80, 10 ))
+    pygame.draw.rect(screen,"green", (player_pos.x- 40 , player_pos.y- 60, 80/10 * playerHealth, 10 ))
     # flip() the display to put your work on screen
     pygame.display.flip()
 
