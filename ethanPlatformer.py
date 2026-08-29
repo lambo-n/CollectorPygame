@@ -1,10 +1,10 @@
 # Example file showing a circle moving on screen
 import random
-from bullet import *
+from ethanBullet import *
 import pygame
-from custom_platform import *
-from levels import *
-from enemies import*
+from ethanPlatform import *
+from ethanLevels import *
+from ethanEnemies import*
 BULLET_COOLDOWN = .95
 
 # pygame setup

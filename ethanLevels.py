@@ -1,4 +1,4 @@
-from custom_platform import *
+from ethanPlatform import *
 
 
 def level1():

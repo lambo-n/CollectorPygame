@@ -24,7 +24,7 @@ enemies = [level1, level2, level3]
 class Enemy:
     def __init__(self, pos, image, health):
         self.pos = pos
-        self.image = pygame.transform.scale(image, (150,150))
+        self.image = pygame.transform.scale(image, (80, 80))
         self.health = health
         self. rect = self.image.get_rect(center=self.pos)
 
